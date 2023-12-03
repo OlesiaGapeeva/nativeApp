@@ -1,18 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ChangeEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 //import Dropdown from 'react-bootstrap/Dropdown';
 import Header from '../../components/header';
+import axios from 'axios';
 import OneCard from '../../components/card';
 import styles from './main.module.scss';
+import BreadCrumbs from '../../components/BreadCrumbs/BreadCrumbs';
+import {useDispatch} from "react-redux";
+import {useTitleValue, useVacancies,
+    setTitleValueAction, setVacanciesAction} from "../../slices/MainSlice.ts";
 
+import { setLinksMapDataAction} from "../../slices/DetailedSlices.ts";
+
+import { useVacancyFromResp, setVacancyFromRespAction } from  "../../slices/RespSlices.ts";
+//import Cookies from "universal-cookie";
+
+//const cookies = new Cookies();
 export type Vacancies = {
     id: number,
     title: string,
     adress?: string |null,
-    time: string,
+    time?: string,
     salary: number,
     company: string,
     city?: string | null,
@@ -30,6 +41,7 @@ export type ReceivedVacancyData = {
     company: string,
     exp: string | undefined | null,
     image: string | undefined | null;
+    status:string;
 }
 
 const mockVacancies = [
@@ -71,75 +83,178 @@ const mockVacancies = [
     }
 ]
 
+export type ReceivedUserData = {
+    id: number,
+    email: string,
+    full_name: string,
+    phone_number: string,
+    password: string,
+    is_superuser: boolean,
+}
 
+// const MainPage: React.FC = () => {
+//     const [vacancies, setVacancies] = useState<Vacancies[]>([]);
+//     const [titleValue, setTitleValue] = useState<string>('')
 
-const MainPage: React.FC = () => {
-    const [vacancies, setVacancies] = useState<Vacancies[]>([]);
-    const [titleValue, setTitleValue] = useState<string>('')
+//     const fetchVacancies = async () => {
+//         let response = null;
+//         let url = 'http://localhost:8000/vacancies';
+    
+//         if (titleValue) {
+//             url += `?keyword=${titleValue}`;
+//         }
+//         console.log(url);
+    
+//         try {
+//             response = await fetch(url);
+//             const jsonData = await response.json();
+//             const newVacanciesArr = jsonData.map((raw: ReceivedVacancyData) => ({
+//                 id: raw.id,
+//                 title: raw.title,
+//                 salary: raw.salary,
+//                 city: raw.city,
+//                 company: raw.company,
+//                 image: raw.image,
+//                 exp: raw.exp
+//             }));
+//             setVacancies(newVacanciesArr);
 
-    const fetchVacancies = async () => {
-        let response = null;
-        let url = 'http://localhost:8000/vacancies'
-
-        if (titleValue) {
-            url += `?keyword=${titleValue}`
-        }
-        console.log(url)
-        try {
-            response = await fetch(url);
-
-            const jsonData = await response.json();
-            const newVacanciesArr = jsonData.map((raw: ReceivedVacancyData) => ({
-                id: raw.id,
-                title: raw.title,
-                salary: raw.salary,
-                city: raw.city,
-                company: raw.company,
-                image: raw.image,
-                exp: raw.exp
-            }))
-            setVacancies(newVacanciesArr);
-        }
-        catch {
-            if (titleValue) {
-                const filteredArray = mockVacancies.filter(mockVacancies => mockVacancies.title.includes(titleValue));
-                setVacancies(filteredArray);
-            } else {
-                setVacancies(mockVacancies);
-            }
-
-        }
+//         }catch (error) {
+//             console.log(error)
+//                 console.error("Error during fetch:", error);
+//                 // Остальной код обработки ошибки
+//             }
+//         // } catch {
+//         //     if (titleValue) {
+//         //         const filteredArray = mockVacancies.filter((mockVacancy) =>
+//         //             mockVacancy.title.includes(titleValue)
+//         //         );
+//         //         setVacancies(filteredArray);
+//         //     } else {
+//         //         setVacancies(mockVacancies);
+//         //     }
+//         // }
         
-    };
+//     };
 
-    useEffect(() => {
-        fetchVacancies();
-    }, []);
+    // useEffect(() => {
+    //     fetchVacancies();
+    // }, []);
 
-    const handleSearchButtonClick = () => {
-        fetchVacancies();
-    }
+    // const handleSearchButtonClick = () => {
+    //     fetchVacancies();
+    // }
 
-    const handleTitleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setTitleValue(event.target.value);
-    };
+    // const handleTitleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
+    //     setTitleValue(event.target.value);
+    // };
 
     
     // const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     //     event.preventDefault();
     // };
 
+    const MainPage = () => {
+        const dispatch = useDispatch()
+        const titleValue = useTitleValue();
+        const vacancies = useVacancies();
+        const vacancyFromResp = useVacancyFromResp();
+
+        
+        
+
+        
+        //const linksMap = useLinksMapData();
+
+        // React.useEffect(() => {
+        //     dispatch(setLinksMapDataAction(new Map<string, string>([
+        //         ['Вакансии', '/vacancies']
+        //     ])))
+        // }, [])
+        //   dispatch(setLinksMapDataAction({ 'Вакансии': '/vacancies' }));
+        //  }, [])
+    
+        const getVacancies = async () => {
+            let url = 'http://localhost:8000/vacancies'
+            if (titleValue) {
+                url += `?keyword=${titleValue}`
+            }
+            try {
+                const response = await axios(url, {
+                    method: 'GET',
+                    withCredentials: true 
+                });
+                console.log("here")
+                const jsonData = response.data.vacancies;
+                const newArr = jsonData.map((raw: ReceivedVacancyData) => ({
+                    id: raw.id,
+                    title: raw.title,
+                    salary: raw.salary,
+                    city: raw.city,
+                    company: raw.company,
+                    image: raw.image,
+                    exp: raw.exp,
+                    status: raw.status
+                }));
+                dispatch(setVacanciesAction(newArr));
+            }
+            catch {
+                console.log('запрос не прошел !')
+                if (titleValue) {
+                    const filteredArray = mockVacancies.filter(mockVacancies => mockVacancies.title.includes(titleValue));
+                    dispatch(setVacanciesAction(filteredArray));
+                }
+                else {
+                    dispatch(setVacanciesAction(mockVacancies));
+                }
+            }
+        };
+
+        const postVacancyToResp = async (id: number) => {
+            try {
+                const response = await axios(`http://localhost:8000/vacancies/${id}/post/`, {
+                    method: 'POST',
+                    withCredentials: true,
+                })
+                const addedVacancy= {
+                    id: response.data.id,
+                    title: response.data.title,
+                    image: response.data.image,
+                    company: response.data.company,
+                    salary: response.data.salary,
+                    city: response.data.city,
+                    exp: response.data.exp,
+                    status: response.data.status
+                }
+                dispatch(setVacancyFromRespAction([...vacancyFromResp, addedVacancy]))
+                toast.success("Вакансия успешно добавлена в отклик!");
+            } catch {
+                toast.error("Эта вакансия уже есть в отклике");
+            }
+        }
+    
+        const handleSearchButtonClick = () => {
+            getVacancies();
+        };
+
+        const handleTitleValueChange = (event: ChangeEvent<HTMLInputElement>) => {
+            dispatch(setTitleValueAction(event.target.value));
+        };
+    
+    
+        // const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        //     event.preventDefault();
+        // };
+    
     return (
         <div className={styles.main_page}>
             <Header/>
             <nav aria-label="breadcrumb" style={{zIndex: '2'}}>
-            <ol className="breadcrumb" style={{ marginTop: '80px' , width: '95.53vw', maxHeight: '100vw'}}>
-            <li className="breadcrumb-item">
-                <Link style={{ color: 'rgb(0, 102, 255)' }} to="/vacancies">
-                Список вакансий
-                </Link>
-            </li>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ol className="breadcrumb" style={{ marginTop: '100px' , width: '95.53vw', height: '45px',  backgroundColor: 'white'}}>
+            <BreadCrumbs links={ new Map<string, string>([
+        ['Вакансии', '/vacancies']
+    ])}></BreadCrumbs>
+            <div style={{display: 'flex', justifyContent: 'center', marginTop: "-30px"}}>
             <Form.Group controlId="name">
                 <Form.Control
                 type="text"
@@ -180,13 +295,14 @@ const MainPage: React.FC = () => {
             </div>
             </ol>
             </nav>
+            
             <div className={styles["hat"]}>
 
                     <div className={styles["cards"]}>
                         {
                         vacancies.map((vacancy: Vacancies) => (
                             <div className='card'>
-                            <OneCard id={vacancy.id} image={vacancy.image} salary={Number(vacancy.salary)} title={vacancy.title} city={vacancy.city} company={vacancy.company} exp={vacancy.exp} onButtonClick={() => console.log('add to application')}></OneCard>
+                            <OneCard id={vacancy.id} image={vacancy.image} salary={Number(vacancy.salary)} title={vacancy.title} city={vacancy.city} company={vacancy.company} exp={vacancy.exp} onButtonClick={() => postVacancyToResp(vacancy.id)}></OneCard>
                             </div>
                         ))}
                     </div>

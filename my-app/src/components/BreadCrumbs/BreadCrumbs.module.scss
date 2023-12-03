@@ -1,0 +1,25 @@
+.breadcrumbs {
+    margin-bottom: 40px;
+    font-size: 10px;
+
+    &__item {
+
+
+        &-link {
+            text-decoration: none;
+            color:rgb(0, 102, 255);
+        }
+
+        &-last {
+            background-color: rgb(0, 102, 255);
+            color: #fff;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        &-icon {
+            margin: 0 5px;
+            color:rgb(0, 102, 255);
+        }
+    }
+}
