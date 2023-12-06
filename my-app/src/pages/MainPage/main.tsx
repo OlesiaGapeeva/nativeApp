@@ -12,9 +12,10 @@ import BreadCrumbs from '../../components/BreadCrumbs/BreadCrumbs';
 import {useDispatch} from "react-redux";
 import {useTitleValue, useVacancies,
     setTitleValueAction, setVacanciesAction} from "../../slices/MainSlice.ts";
-
-import { setLinksMapDataAction} from "../../slices/DetailedSlices.ts";
-
+import { ErrorInfo } from 'react-dom/client';
+import { useIsAuth} from "../../slices/AuthSlices.ts";
+import {setCurrentRespIdAction, useCurrentRespId} from "../../slices/RespSlices.ts";
+import { useLinksMapData, setLinksMapDataAction} from "../../slices/DetailedSlices.ts";
 import { useVacancyFromResp, setVacancyFromRespAction } from  "../../slices/RespSlices.ts";
 //import Cookies from "universal-cookie";
 
@@ -159,21 +160,41 @@ export type ReceivedUserData = {
         const titleValue = useTitleValue();
         const vacancies = useVacancies();
         const vacancyFromResp = useVacancyFromResp();
-
+        const isUserAuth = useIsAuth();
         
         
 
         
-        //const linksMap = useLinksMapData();
+        const linksMap = useLinksMapData();
 
-        // React.useEffect(() => {
-        //     dispatch(setLinksMapDataAction(new Map<string, string>([
-        //         ['Вакансии', '/vacancies']
-        //     ])))
-        // }, [])
-        //   dispatch(setLinksMapDataAction({ 'Вакансии': '/vacancies' }));
-        //  }, [])
-    
+        React.useEffect(() => {
+            dispatch(setLinksMapDataAction(new Map<string, string>([
+                ['Вакансии', '/vacancies']
+            ])))
+        }, [])
+
+        const getCurrentResp = async (id: number) => {
+            try {
+              const response = await axios(`http://localhost:8000/resp/${id}/`, {
+                method: 'GET',
+                withCredentials: true,
+              })
+              const newArr = response.data.vacancies.map((raw: ReceivedVacancyData) => ({
+                id: raw.id,
+                title: raw.title,
+                salary: raw.salary,
+                city: raw.city,
+                company: raw.company,
+                image: raw.image,
+                exp: raw.exp,
+                status: raw.status
+            }));
+          
+            dispatch(setVacancyFromRespAction(newArr))
+        } catch(error) {
+          throw error;
+        }
+      }
         const getVacancies = async () => {
             let url = 'http://localhost:8000/vacancies'
             if (titleValue) {
@@ -185,6 +206,10 @@ export type ReceivedUserData = {
                     withCredentials: true 
                 });
                 console.log("here")
+                if (response.data.resp_id) {
+                    getCurrentResp(response.data.resp_id);
+                    dispatch(setCurrentRespIdAction(response.data.resp_id))
+                }
                 const jsonData = response.data.vacancies;
                 const newArr = jsonData.map((raw: ReceivedVacancyData) => ({
                     id: raw.id,
@@ -212,7 +237,7 @@ export type ReceivedUserData = {
 
         const postVacancyToResp = async (id: number) => {
             try {
-                const response = await axios(`http://localhost:8000/vacancies/${id}/post/`, {
+                const response = await axios(`http://localhost:8000/vacancies/${id}/add/`, {
                     method: 'POST',
                     withCredentials: true,
                 })
@@ -226,10 +251,17 @@ export type ReceivedUserData = {
                     exp: response.data.exp,
                     status: response.data.status
                 }
+                
                 dispatch(setVacancyFromRespAction([...vacancyFromResp, addedVacancy]))
                 toast.success("Вакансия успешно добавлена в отклик!");
-            } catch {
-                toast.error("Эта вакансия уже есть в отклике");
+            } catch (error) {
+                if (error instanceof Error) {
+                    // Если error является экземпляром класса Error
+                    toast.error("Вакансия уже добавлена в отклик");
+                } else {
+                    // Если error не является экземпляром класса Error (что-то другое)
+                    toast.error('Ошибка при добавлении');
+                }
             }
         }
     
@@ -251,9 +283,7 @@ export type ReceivedUserData = {
             <Header/>
             <nav aria-label="breadcrumb" style={{zIndex: '2'}}>
             <ol className="breadcrumb" style={{ marginTop: '100px' , width: '95.53vw', height: '45px',  backgroundColor: 'white'}}>
-            <BreadCrumbs links={ new Map<string, string>([
-        ['Вакансии', '/vacancies']
-    ])}></BreadCrumbs>
+            <BreadCrumbs links={linksMap}></BreadCrumbs>
             <div style={{display: 'flex', justifyContent: 'center', marginTop: "-30px"}}>
             <Form.Group controlId="name">
                 <Form.Control
@@ -302,7 +332,7 @@ export type ReceivedUserData = {
                         {
                         vacancies.map((vacancy: Vacancies) => (
                             <div className='card'>
-                            <OneCard id={vacancy.id} image={vacancy.image} salary={Number(vacancy.salary)} title={vacancy.title} city={vacancy.city} company={vacancy.company} exp={vacancy.exp} onButtonClick={() => postVacancyToResp(vacancy.id)}></OneCard>
+                            <OneCard id={vacancy.id} image={vacancy.image} salary={Number(vacancy.salary)} title={vacancy.title} city={vacancy.city} company={vacancy.company} exp={vacancy.exp} isUserAuth={isUserAuth} onButtonClick={() => postVacancyToResp(vacancy.id)}></OneCard>
                             </div>
                         ))}
                     </div>

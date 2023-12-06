@@ -15,9 +15,10 @@ export type CardProps = {
   exp: string;
   onButtonClick?: React.MouseEventHandler;
   onImageClick?: React.MouseEventHandler;
+  isUserAuth: boolean;
 };
 
-const OneCard: React.FC<CardProps> = ({id, title, salary, city, company, image, exp, onButtonClick, onImageClick }) => {
+const OneCard: React.FC<CardProps> = ({id, title, salary, city, company, image, exp, onButtonClick, onImageClick, isUserAuth}) => {
   return (
     <Card className={styles.card}>
         <div>
@@ -49,7 +50,7 @@ const OneCard: React.FC<CardProps> = ({id, title, salary, city, company, image, 
       </span>
     </p>
       <div style={{ paddingLeft: '20px' }}>
-      <button type="button" className={styles.btn_apply} onClick={onButtonClick}>Откликнуться</button>
+      {isUserAuth &&<button type="button" className={styles.btn_apply} onClick={onButtonClick}>Откликнуться</button>}
       </div>
         <div className='mt-auto'>
         </div>

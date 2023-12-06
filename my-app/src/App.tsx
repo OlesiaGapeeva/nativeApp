@@ -20,12 +20,13 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import React from 'react';
 import MainPage from './pages/MainPage/main';
-import DetaliedPage from './pages/DetailedPage/detailed';
-//import RegistrationPage from 'pages/RegistrationPage';
-//import LoginPage from 'pages/LoginPage';
-//import CurrentApplicationPage from 'pages/CurrentApplicationPage';
+import DetailedPage from './pages/DetailedPage/detailed';
+import RegistrationPage from './pages/RegistrationPage/RegistrationPage';
+import LoginPage from './pages/LoginPage/LoginPage';
+import CurrentRespPage from './pages/CurrenRespPage/CurrentRespPage';
 //import ApplicationsListPage from 'pages/ApplicationsListPage';
 //import SelectedApplicationPage from 'pages/SelectedApplicationPage';
+import RespListPage from './pages/RespListPage/RespListPage';
 import axios, {AxiosResponse} from 'axios';
 import Cookies from "universal-cookie";
 import {useDispatch} from "react-redux";
@@ -36,6 +37,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { mockVacancies} from "./consts";
 import { setCurrentRespDateAction, setVacancyFromRespAction } from "./slices/RespSlices"
+import { Link } from 'react-router-dom';
 //import { useCurrentRespId } from "./slices/RespSlices"
 
 const cookies = new Cookies();
@@ -86,8 +88,13 @@ function App() {
     try {
         const response = await axios('http://localhost:8000/vacancies', {
             method: 'GET',
-            withCredentials: true 
+            withCredentials: true,
+            
         });
+        console.log(response)
+        if (response.data.resp_id) {
+            console.log("Что-то есть")
+        }
         const vacancies = response.data.vacancies;
         if (response.data.resp_id) {
           getCurrentResp(response.data.resp_id);
@@ -144,23 +151,23 @@ const getCurrentResp = async (id: number) => {
   return (
     <div className='app'>
       <HashRouter>
-          <Routes>
-              <Route path='/'  element={<h1>Это наша стартовая страница</h1>}/>
-              <Route path="/vacancies" element={<MainPage/>} />
-              <Route path="/vacancies">
-                <Route path=":id" element={<DetaliedPage />} />
-              </Route>
-             {!isAuth && <Route path='/registration' element={<h1>Страница ргистрации</h1>}></Route>}
-              {!isAuth && <Route path='/login' element={<h1>Это наша страница входа</h1>}></Route>}
-              {isAuth && <Route path='/resp' element={<h1>Это страница текущей заявки</h1>}/>}
-              {isAuth && <Route path='/resp' element={<h1>Это страница списка заявок</h1>}></Route>}
-              {isAuth && <Route path="/resp">
-                <Route path=":id" element={<h1>Это страница выбранной заявки</h1>} />
-              </Route>}
-              <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-      </HashRouter>
-      <ToastContainer autoClose={1500} pauseOnHover={false} />
+      <Routes>
+        <Route path='/' element={<div><h1>Это наша стартовая страница</h1> <Link to='/vacancies'>another page</Link></div>} />
+        <Route path="/vacancies" element={<MainPage />} />
+        <Route path="/vacancies/:id" element={<DetailedPage />} />
+        {!isAuth && <Route path='/registration' element={<RegistrationPage />} />}
+        {!isAuth && <Route path='/login' element={<LoginPage />} />}
+        {isAuth && (
+          <>
+            <Route path='/resp' element={<CurrentRespPage />} />
+            <Route path='/responses' element={<RespListPage />} />
+            <Route path="/resp/:id/" element={<h1>Это страница выбранной заявки</h1>} />
+          </>
+        )}
+        <Route path="*" element={<Navigate to="/vacancies" replace />} />
+      </Routes>
+    </HashRouter>
+      <ToastContainer autoClose={1000} pauseOnHover={false} />
     </div>
     );
   }

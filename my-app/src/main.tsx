@@ -11,9 +11,7 @@ if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <Provider store={store}>
-        <Router> {/* оберните ваше приложение в Router */}
           <App />
-        </Router>
       </Provider>
     </React.StrictMode>,
   ) 

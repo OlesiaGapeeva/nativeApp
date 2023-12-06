@@ -47,6 +47,7 @@ const dataSlice = createSlice({
     },
     setVacancyFromResp(state, action: PayloadAction<VacancyData[]>) {
       state.vacancyFromResp = action.payload;
+      console.log('INFO', action.payload)
     },
     setResp(state, action: PayloadAction<RespData[]>) {
       state.resp = action.payload;

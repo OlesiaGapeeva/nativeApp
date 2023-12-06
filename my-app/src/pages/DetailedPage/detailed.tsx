@@ -7,6 +7,8 @@ import BreadCrumbs from '../../components/BreadCrumbs/BreadCrumbs';
 import { useVacancy, useLinksMapData, setVacancyAction, setLinksMapDataAction } from "../../slices/DetailedSlices.ts"
 import {useDispatch} from "react-redux";
 import axios from 'axios';
+import { useVacancyFromResp, setVacancyFromRespAction } from  "../../slices/RespSlices.ts";
+import { toast } from 'react-toastify';
 
 
 export type Vacancies = {
@@ -72,10 +74,14 @@ const mockVacancies = [
     }
 ]
 
+
 const VacancyPage = () => {  
   const dispatch = useDispatch();
   const vacancy = useVacancy();
   const linksMap = useLinksMapData();
+  const vacancyFromResp = useVacancyFromResp();
+
+  console.log("Линк", linksMap)
 
 
   const params = useParams();
@@ -126,6 +132,35 @@ const VacancyPage = () => {
       }
   }, []);
 
+  const postVacancyToResp = async (id: number) => {
+    try {
+        const response = await axios(`http://localhost:8000/vacancies/${id}/add/`, {
+            method: 'POST',
+            withCredentials: true,
+        })
+        const addedVacancy= {
+            id: response.data.id,
+            title: response.data.title,
+            image: response.data.image,
+            company: response.data.company,
+            salary: response.data.salary,
+            city: response.data.city,
+            exp: response.data.exp,
+            status: response.data.status
+        }
+        dispatch(setVacancyFromRespAction([...vacancyFromResp, addedVacancy]))
+        toast.success("Вакансия успешно добавлена в отклик!");
+    } catch (error) {
+        if (error instanceof Error) {
+            // Если error является экземпляром класса Error
+            toast.error("Вы не авторизированны");
+        } else {
+            // Если error не является экземпляром класса Error (что-то другое)
+            toast.error('Вакансия уже добавлена в отклик');
+        }
+    }
+  }
+
   return (
     <div className={styles.Detalied_Page}>
       <Header/>
@@ -149,7 +184,7 @@ const VacancyPage = () => {
       </span>
       <p></p>
       <div style={{ paddingLeft: '20px' }}>
-      <button type="button" className={styles.btn_apply} >Откликнуться</button>
+      {/* <button type="button" className={styles.btn_apply} onClick={() => postVacancyToResp(vacancy.id)} >Откликнуться</button> */}
       </div>
         <div className='mt-auto'>
         </div>
