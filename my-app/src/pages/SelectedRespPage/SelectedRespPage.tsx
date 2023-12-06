@@ -8,15 +8,17 @@ import BreadCrumbs from '../../components/BreadCrumbs/BreadCrumbs';
 import { useDispatch } from 'react-redux';
 import { useLinksMapData, setLinksMapDataAction } from "../../slices/DetailedSlices.ts";
 
-export type ReceivedSubscriptionData = {
-    id: number;
-    title: string;
-    price: number;
-    info: string;
-    src: string;
-    id_category: number;
-    category: string;
-  }
+export type ReceivedVacancyData = {
+  id: number,
+  title: string,
+  salary: number,
+  city: string,
+  company: string,
+  exp: string | undefined | null,
+  image: string | undefined | null;
+  status:string;
+}
+
 
 const SelectedRespPage = () => {
     const params = useParams();
@@ -32,14 +34,16 @@ const SelectedRespPage = () => {
             withCredentials: true,
           })
 
-          const newArr = response.data.vacancies.map((raw: ReceivedVacData) => ({
+          const newArr = response.data.vacancies.map((raw: ReceivedVacancyData) => ({
             id: raw.id,
-            title: raw.title,
-            price: raw.price,
-            info: raw.info,
-            src: raw.src,
-            categoryTitle: raw.category
-        }));
+                title: raw.title,
+                salary: raw.salary,
+                city: raw.city,
+                company: raw.company,
+                image: raw.image,
+                exp: raw.exp,
+                status: raw.status
+            }));
         setCurrentVac(newArr)
         } catch(error) {
           throw error;
@@ -48,9 +52,9 @@ const SelectedRespPage = () => {
 
     React.useEffect(() => {
         const newLinksMap = new Map<string, string>(linksMap); // Копирование старого Map
-        newLinksMap.set(id, '/resp/' + id);
+        newLinksMap.set("Детали отклика", '/resp/' + id);
         dispatch(setLinksMapDataAction(newLinksMap))
-        getCurrentApplication();
+        getCurrentResp();
 
     }, [])
 
@@ -60,12 +64,12 @@ const SelectedRespPage = () => {
             <div className={styles['application__page-wrapper']}>
                 <BreadCrumbs links={linksMap}></BreadCrumbs>
                 <h1 className={styles['application__page-title']}>
-                    Добавленные абонементы
+                    Добавленные вакансии
                 </h1>
-                <VacnciesTable flag={true} vacancies={currentVac} className={styles['application__page-table']}/>
+                <VacancyTable flag={true} vacancies={currentVac} className={styles['application__page-table']}/>
             </div>
         </div>
     )
 }
 
-export default SelectedApplicationPage
+export default SelectedRespPage

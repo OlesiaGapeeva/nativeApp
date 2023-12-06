@@ -10,14 +10,15 @@
 .card{
     width: 60vw;
     background-color: rgb(255, 252, 252);
-    margin-top: 20px;
-    margin-left: 5px;
+    // margin-top: 20px;
+    // margin-left: 5px;
+    // margin-bottom: 20px;
     position: relative;
     margin-right: auto;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
+    align-items: left;
   }
 
   .btn_apply {
@@ -27,7 +28,7 @@
     padding: 0.5rem 1rem;
     cursor: pointer;
     margin-bottom: 10px;
-    border-radius: 50%;
+    border-radius: 8px;
 
     display: inline-block
   }

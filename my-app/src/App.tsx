@@ -26,6 +26,7 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import CurrentRespPage from './pages/CurrenRespPage/CurrentRespPage';
 //import ApplicationsListPage from 'pages/ApplicationsListPage';
 //import SelectedApplicationPage from 'pages/SelectedApplicationPage';
+import SelectedRespPage from './pages/SelectedRespPage/SelectedRespPage';
 import RespListPage from './pages/RespListPage/RespListPage';
 import axios, {AxiosResponse} from 'axios';
 import Cookies from "universal-cookie";
@@ -37,7 +38,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { mockVacancies} from "./consts";
 import { setCurrentRespDateAction, setVacancyFromRespAction } from "./slices/RespSlices"
-import { Link } from 'react-router-dom';
 //import { useCurrentRespId } from "./slices/RespSlices"
 
 const cookies = new Cookies();
@@ -152,7 +152,7 @@ const getCurrentResp = async (id: number) => {
     <div className='app'>
       <HashRouter>
       <Routes>
-        <Route path='/' element={<div><h1>Это наша стартовая страница</h1> <Link to='/vacancies'>another page</Link></div>} />
+        {/* <Route path='/' element={<div><h1>Это наша стартовая страница</h1> <Link to='/vacancies'>another page</Link></div>} /> */}
         <Route path="/vacancies" element={<MainPage />} />
         <Route path="/vacancies/:id" element={<DetailedPage />} />
         {!isAuth && <Route path='/registration' element={<RegistrationPage />} />}
@@ -161,7 +161,7 @@ const getCurrentResp = async (id: number) => {
           <>
             <Route path='/resp' element={<CurrentRespPage />} />
             <Route path='/responses' element={<RespListPage />} />
-            <Route path="/resp/:id/" element={<h1>Это страница выбранной заявки</h1>} />
+            <Route path="/resp/:id/" element={<SelectedRespPage />} />
           </>
         )}
         <Route path="*" element={<Navigate to="/vacancies" replace />} />

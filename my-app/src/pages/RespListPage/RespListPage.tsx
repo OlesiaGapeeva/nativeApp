@@ -30,14 +30,16 @@ const RespListPage = () => {
             method: 'GET',
             withCredentials: true
           })
-          const newArr = response.data.map((raw: ReceivedRespData) => ({
+          console.log(response.data)
+          const newArr = response.data
+          .filter((raw: ReceivedRespData) => raw.status != 'delited')
+          .map((raw: ReceivedRespData) => ({
             id: raw.id,
             status: getStatusTranslation(raw.status),
             creation_date: raw.creation_date,
             editing_date: raw.editing_date,
             approving_date: raw.approving_date,
         }));
-        console.log("ARRAY@",newArr)
         dispatch(setRespAction(newArr))
         } catch(error) {
           throw error

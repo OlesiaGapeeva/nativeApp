@@ -30,7 +30,7 @@ const OneCard: React.FC<CardProps> = ({id, title, salary, city, company, image, 
 
         </div>
       
-      <Card.Body>
+      <Card.Body className={styles.body}>
         <div>
         <Link to={`/vacancies/${id}`} style={{ textDecoration: 'none', color: '#0066ff' }}>
         
